@@ -1,10 +1,11 @@
 var marginLeft = 5;
 var radius = 2;
-var increment = 5;
+var increment = 2;
 var resetHeight = -50;
 var fill = "#87CEFA";
 var svgNS = "http://www.w3.org/2000/svg";
-var fps = 40;
+var fps = 50;
+var translationScale = 20;
 
 var mixer_rain = 0.7;
 var mixer_shoe = 1.0;
@@ -15,7 +16,8 @@ var height;
 var width;
 
 var getInitialVelocity = function() {
-    return 10 + Math.random() * 5;
+    var velBase = Math.sqrt(window.innerWidth)/4.0;
+    return 30*(velBase + Math.random() * velBase*2);
 }
 
 var loopRain = function() {
@@ -28,7 +30,7 @@ var loopRain = function() {
             drop.setAttribute("data-vy", getInitialVelocity());
         } else {
             var vy = parseFloat(drop.getAttribute("data-vy"));
-            drop.setAttribute("cy", cy+vy*(.4 + .8 *cy/(height-resetHeight)));
+            drop.setAttribute("cy", cy+vy/fps);
         }
     }
 }
@@ -68,3 +70,33 @@ window.onresize = function() {
     resetRain();
     startRain(document.querySelector("#rain"));
 }
+
+var previousMouseEvent;
+window.addEventListener('mousemove', function(event) {
+    return;
+    if(rain != undefined) {
+        if(previousMouseEvent == undefined) {
+            previousMouseEvent = event;
+            return;
+        }
+        var len = rain.children.length;
+        for(var i = 0;i<len;++i) {
+            var drop = rain.children[i];
+            var cx = parseFloat(drop.getAttribute('cx'));
+            var cy = parseFloat(drop.getAttribute('cy'));
+            var ncx;
+            var dx = cx - event.clientX;
+            var dy = cy - event.clientY;
+            var dsq = dx * dx + dy * dy;
+            if(dsq > 300000) continue;
+            if(dsq < 5000) dsq = 5000;
+            var prevEventDX = event.clientX - previousMouseEvent.clientX;
+            ncx = cx + translationScale / dsq * prevEventDX;
+            if(ncx > width) {
+                drop.setAttribute("cx", ncx - width);
+            } else {
+                drop.setAttribute("cx", ncx);
+            }
+        }
+    }
+});
