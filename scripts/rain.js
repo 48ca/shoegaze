@@ -45,7 +45,7 @@ var startRain = function(svg) {
         var drop = document.createElementNS(svgNS, "circle");
         drop.setAttribute('r',radius);
         drop.setAttribute('cx',i+radius);
-        drop.setAttribute('cy', resetHeight);
+        drop.setAttribute('cy', Math.floor(height * Math.random()));
         drop.setAttribute('fill', fill);
         drop.setAttribute('data-vy', getInitialVelocity());
         rain.appendChild(drop);
